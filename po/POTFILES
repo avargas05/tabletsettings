@@ -1,0 +1,4 @@
+data/com.github.avargas05.tabletsettings.desktop.in
+data/com.github.avargas05.tabletsettings.appdata.xml.in
+data/com.github.avargas05.tabletsettings.gschema.xml
+src/window.ui

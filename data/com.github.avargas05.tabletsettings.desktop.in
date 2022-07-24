@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=tabletsettings
+Exec=tabletsettings
+Icon=com.github.avargas05.tabletsettings
+Terminal=false
+Type=Application
+Categories=Utility,GTK;
+StartupNotify=true

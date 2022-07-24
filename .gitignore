@@ -1,0 +1,6 @@
+bin/
+pkg/
+target/
+*any.pkg.tar.xz
+com.github.avargas05.tabletsettings.json
+.vscode/
