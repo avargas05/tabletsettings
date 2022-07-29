@@ -350,13 +350,51 @@ impl TabletsettingsWindow {
 
         let reset_all_button = &self.imp().reset_all_button;
         reset_all_button.connect_clicked(glib::clone!(@weak self as app => move |_| {
+            // Set default settings to all devices.
             let devices: Vec<TabletDevice> = app.imp().tablet_devices.borrow().to_vec();
-            let monitors: Vec<Monitor> = app.imp().monitors.borrow().to_vec();
-            let device: glib::GString = app.imp().devices_combobox.active_text().unwrap();
-            let monitor: Option<glib::GString> = app.imp().monitors_combobox.active_text();
-            let window: Option<glib::GString> = app.imp().windows_combobox.active_text();
-            let rotation: Option<glib::GString> = app.imp().rotation_combobox.active_text();
-            let keep = app.imp().aspect_ratio_checkbutton.is_active();
+
+            // Get dimensions to whole desktop layout.
+            // Man pages state wildcard * should work, but doesn't.
+            // Need to get dimensions manually.
+            let command = Command::new("sh")
+                .arg("-c")
+                .arg("swaymsg -t get_tree")
+                .stdout(Stdio::piped())
+                .output()
+                .unwrap();
+
+            // Parse json output
+            let stdout = String::from_utf8(command.stdout).unwrap();
+            let root: WaylandOutput = serde_json::from_str(&stdout).unwrap();
+
+            // Iterate through all outputs and add to ComboBoxText
+            let width = root.rect.width;
+            let height = root.rect.height;
+
+            for device in devices {
+                let command: String = format!(
+                    "swaymsg input {} map_to_region 0 0 {} {}", device.identifier, width, height
+                );
+
+                Command::new("sh")
+                    .arg("-c")
+                    .arg(command)
+                    .stdout(Stdio::piped())
+                    .output()
+                    .unwrap();
+
+                // Map to entire surface.
+                let ratio_command: String = format!(
+                    "swaymsg input {0} map_from_region 0.0x0.0 1.0x1.0", device.identifier
+                );
+
+                Command::new("sh")
+                    .arg("-c")
+                    .arg(ratio_command)
+                    .stdout(Stdio::piped())
+                    .output()
+                    .unwrap();
+            }
         }));
     }
 }
@@ -405,6 +443,8 @@ fn adjust_tablet_ratio(tablet_device: &TabletDevice, window_width: i32, window_h
             .output()
             .unwrap();
 
+    } else if let Err(wacom_device) = wacom_device {
+        wacom_device.print_error();
     }
 }
 

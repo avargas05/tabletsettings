@@ -13,6 +13,12 @@ pub struct Error {
     msg: String,
 }
 
+impl Error {
+    pub fn print_error(&self) {
+        eprintln!("Error: {:?}\n{:?}", self.code, self.msg);
+    }
+}
+
 pub struct Device {
     pub device: wacom_sys::WacomDevice,
     pub width: i32,
