@@ -33,9 +33,12 @@ impl Device {
 
         let err_ptr = unsafe { wacom_sys::libwacom_error_new() };
         if err_ptr.is_null() {
-            return Err(Error{ code: wacom_sys::WacomErrorCode::WERROR_BAD_ALLOC, msg: String::new() });
+            unsafe { wacom_sys::libwacom_database_destroy(database); }
+            return Err(Error{
+                code: wacom_sys::WacomErrorCode::WERROR_BAD_ALLOC,
+                msg: String::from("Memory allocation rror creating error pointer.")
+            });
         }
-
 
         let wacom_device_ptr = unsafe {
             wacom_sys::libwacom_new_from_usbid(
@@ -49,19 +52,20 @@ impl Device {
         let mut err = unsafe { *err_ptr };
 
         if wacom_device_ptr.is_null() {
-            if err_ptr.is_null() {
-                return Err(Error {code: wacom_sys::WacomErrorCode::WERROR_BAD_ALLOC, msg: String::new()});
-            }
-
             let code: wacom_sys::WacomErrorCode = unsafe {
                 wacom_sys::libwacom_error_get_code(&mut err)
             };
+
+            unsafe { wacom_sys::libwacom_database_destroy(database); }
 
             let c_buf: *const c_char = unsafe { wacom_sys::libwacom_error_get_message(&mut err) };
             let c_str: &CStr = unsafe { CStr::from_ptr(c_buf) };
             let str_slice: &str = c_str.to_str().unwrap();
             let msg: String = str_slice.to_owned();
 
+            let ptr = Box::new(err_ptr);
+            let ptr2 = Box::into_raw(ptr);
+            unsafe { wacom_sys::libwacom_error_free(ptr2); }
             return Err(Error { code, msg });
         }
 
