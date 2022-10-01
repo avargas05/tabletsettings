@@ -6,13 +6,13 @@ authors = ["avargas05 <avargas05.github@outlook.com>"]
 
 [dependencies]
 gettext-rs = { version = "0.7", features = ["gettext-system"] }
-gtk4 = "0.4.7"
-x11 = "2.18"
+gtk4 = "0.4"
+x11 = "2.20"
 wacom-sys = "0.1.0"
-serde = { version = "1.0.136", features = ["derive"] }
-serde_json = "1.0.79"
-libc = "0.2.126"
-unicode-truncate = "0.2.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+libc = "0.2"
+unicode-truncate = "0.2"
 
 [build-dependencies]
 pkg_config = { package = "pkg-config", version = "0.3.25" }
